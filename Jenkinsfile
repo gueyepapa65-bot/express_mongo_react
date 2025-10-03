@@ -66,17 +66,18 @@ pipeline {
             }
         }
 
-        stage('Push Docker Images') {
-            steps {
-                withCredentials([usernamePassword(credentialsId: 'AWS1234', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-                    sh '''
-                        echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
-                        docker push $DOCKER_USER/$FRONT_IMAGE:latest
-                        docker push $DOCKER_USER/$BACK_IMAGE:latest
-                    '''
-                }
-            }
+      stage('Push Docker Images') {
+    steps {
+        withCredentials([string(credentialsId: 'jenkins_docker', variable: 'DOCKER_PASS')]) {
+            sh """
+                echo \$DOCKER_PASS | docker login -u $DOCKER_HUB_USER --password-stdin
+                docker push $DOCKER_HUB_USER/$FRONT_IMAGE:latest
+                docker push $DOCKER_HUB_USER/$BACK_IMAGE:latest
+            """
         }
+    }
+}
+
 
         stage('Clean Docker') {
             steps {
