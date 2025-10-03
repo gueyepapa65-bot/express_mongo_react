@@ -60,8 +60,8 @@ pipeline {
         stage('Build Docker Images') {
             steps {
                 script {
-                    bat "docker build -t $DOCKER_HUB_USER/$FRONT_IMAGE:latest ./front-end"
-                    bat "docker build -t $DOCKER_HUB_USER/$BACK_IMAGE:latest ./back-end"
+                    sh "docker build -t $DOCKER_HUB_USER/$FRONT_IMAGE:latest ./front-end"
+                    sh "docker build -t $DOCKER_HUB_USER/$BACK_IMAGE:latest ./back-end"
                 }
             }
         }
