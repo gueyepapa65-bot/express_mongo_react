@@ -139,7 +139,7 @@ pipeline {
                     Message du commit : ${env.commit_message}
                     Détails : ${env.BUILD_URL}
                 """,
-                to: "gueyepapa@gmail.com"
+                to: "gueyepapa65@gmail.com"
             )
         }
     }
