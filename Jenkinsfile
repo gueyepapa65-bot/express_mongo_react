@@ -10,15 +10,15 @@ pipeline {
         FRONT_IMAGE = 'express-frontend'
         BACK_IMAGE  = 'express-backend'
     }
+
     triggers {
-        // Pour que le pipeline démarre quand le webhook est reçu
         GenericTrigger(
             genericVariables: [
                 [key: 'ref', value: '$.ref'],
                 [key: 'pusher_name', value: '$.pusher.name'],
                 [key: 'commit_message', value: '$.head_commit.message']
             ],
-            causeString: 'Push par $pusher_name sur $ref: "$commit_message"',
+            causeString: 'Push par ${pusher_name} sur ${ref}: "${commit_message}"',
             token: 'mysecret',
             printContributedVariables: true,
             printPostContent: true
@@ -35,7 +35,7 @@ pipeline {
         stage('Install dependencies - Backend') {
             steps {
                 dir('back-end') {
-                    bat 'npm install'
+                    sh 'npm install'
                 }
             }
         }
@@ -43,7 +43,7 @@ pipeline {
         stage('Install dependencies - Frontend') {
             steps {
                 dir('front-end') {
-                    bat 'npm install'
+                    sh 'npm install'
                 }
             }
         }
@@ -71,14 +71,13 @@ pipeline {
                 withCredentials([usernamePassword(credentialsId: 'AWS1234', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
                     sh '''
                         echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
-                        docker push $DOCKER_USER/react-frontend:latest
-                        docker push $DOCKER_USER/express-backend:latest
+                        docker push $DOCKER_USER/$FRONT_IMAGE:latest
+                        docker push $DOCKER_USER/$BACK_IMAGE:latest
                     '''
                 }
             }
         }
 
-        // on supprime les conteneur inactif dans docker container
         stage('Clean Docker') {
             steps {
                 sh 'docker container prune -f'
@@ -95,7 +94,7 @@ pipeline {
 
         stage('Deploy (compose.yaml)') {
             steps {
-                dir('.') {  
+                dir('.') {
                     sh 'docker-compose -f compose.yaml down || true'
                     sh 'docker-compose -f compose.yaml pull'
                     sh 'docker-compose -f compose.yaml up -d'
@@ -121,15 +120,25 @@ pipeline {
     post {
         success {
             emailext(
-                subject: "Build SUCCESS: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
-                body: "Pipeline réussi\nDétails : ${env.BUILD_URL}",
+                subject: "✅ Build SUCCESS: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+                body: """
+                    Pipeline réussi 🎉
+                    Déclenché par ${env.pusher_name}
+                    Message du commit : ${env.commit_message}
+                    Détails : ${env.BUILD_URL}
+                """,
                 to: "gueyepapa65@gmail.com"
             )
         }
         failure {
             emailext(
-                subject: "Build FAILED: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
-                body: "Le pipeline a échoué\nDétails : ${env.BUILD_URL}",
+                subject: "❌ Build FAILED: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+                body: """
+                    Le pipeline a échoué 😢
+                    Déclenché par ${env.pusher_name}
+                    Message du commit : ${env.commit_message}
+                    Détails : ${env.BUILD_URL}
+                """,
                 to: "gueyepapa@gmail.com"
             )
         }
