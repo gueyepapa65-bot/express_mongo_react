@@ -94,16 +94,17 @@ pipeline {
         }
 
         stage('Deploy (compose.yaml)') {
-            steps {
-                dir('.') {
-                    sh 'docker-compose -f compose.yaml down || true'
-                    sh 'docker-compose  -f compose.yaml pull'
-                    sh 'docker-compose -f compose.yaml up -d'
-                    sh 'docker-compose -f compose.yaml ps'
-                    sh 'docker-compose -f compose.yaml logs --tail=50'
-                }
-            }
+    steps {
+        dir('.') {
+            sh 'docker-compose -f compose.yaml down || true'
+            sh 'docker-compose -f compose.yaml pull'
+            sh 'docker-compose -f compose.yaml up -d'
+            sh 'docker-compose -f compose.yaml ps'
+            sh 'docker-compose -f compose.yaml logs --tail=50'
         }
+    }
+}
+
 
         stage('Smoke Test') {
             steps {
