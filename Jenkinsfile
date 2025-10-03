@@ -51,8 +51,8 @@ pipeline {
         stage('Run Tests') {
             steps {
                 script {
-                    sh 'cd back-end && npm test || echo "Aucun test backend"'
-                    sh 'cd front-end && npm test || echo "Aucun test frontend"'
+                    bat 'cd back-end && npm test || echo "Aucun test backend"'
+                    bat 'cd front-end && npm test || echo "Aucun test frontend"'
                 }
             }
         }
@@ -60,8 +60,8 @@ pipeline {
         stage('Build Docker Images') {
             steps {
                 script {
-                    sh "docker build -t $DOCKER_HUB_USER/$FRONT_IMAGE:latest ./front-end"
-                    sh "docker build -t $DOCKER_HUB_USER/$BACK_IMAGE:latest ./back-end"
+                    bat "docker build -t $DOCKER_HUB_USER/$FRONT_IMAGE:latest ./front-end"
+                    bat "docker build -t $DOCKER_HUB_USER/$BACK_IMAGE:latest ./back-end"
                 }
             }
         }
